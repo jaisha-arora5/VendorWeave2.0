@@ -11,7 +11,6 @@ import Vendors from './Pages/Vendors/Vendors';
 export default function App() {
   return (
     <div>
-      <h1>Welcome to the Client App</h1>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
