@@ -1,18 +1,17 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { useFirm } from "../../../../context/FirmContext"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Button } from "../../../../components/ui/button"
 import { Input } from "../../../../components/ui/input"
 import { Label } from "../../../../components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
 
-export default function AddVendorPage() {
-  const { firmId } = useParams()
+export default function EditVendorPage() {
+  const { vendorId } = useParams()
   const navigate = useNavigate()
-  const { activeFirm } = useFirm()
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [formData, setFormData] = useState({
@@ -23,7 +22,65 @@ export default function AddVendorPage() {
     address: "",
     category: "supplier",
     notes: "",
+    firmName: "",
   })
+
+  // Load vendor data on mount
+  useEffect(() => {
+    const loadVendorData = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      // Mock vendor data based on vendorId
+      const mockVendors: Record<string, any> = {
+        v1: {
+          name: "Vendor Alpha",
+          contactPerson: "John Smith",
+          email: "john@vendoralpha.com",
+          phone: "+1 (555) 111-1111",
+          address: "100 Alpha Street, Tech City, CA 94000",
+          category: "supplier",
+          notes: "Primary supplier for components",
+          firmName: "Alpha Corp",
+        },
+        v2: {
+          name: "Vendor Beta",
+          contactPerson: "Jane Doe",
+          email: "jane@vendorbeta.com",
+          phone: "+1 (555) 222-2222",
+          address: "200 Beta Avenue, Service City, NY 10001",
+          category: "service-provider",
+          notes: "Provides maintenance and support",
+          firmName: "Nimbus Ltd",
+        },
+        v3: {
+          name: "Vendor Gamma",
+          contactPerson: "Mike Johnson",
+          email: "mike@vendorgamma.com",
+          phone: "+1 (555) 333-3333",
+          address: "300 Gamma Way, Supply Town, TX 75001",
+          category: "manufacturer",
+          notes: "Custom manufacturing solutions",
+          firmName: "Orion Group",
+        },
+        v4: {
+          name: "Vendor Delta",
+          contactPerson: "Sarah Williams",
+          email: "sarah@vendordelta.com",
+          phone: "+1 (555) 444-4444",
+          address: "400 Delta Road, Distribution Hub, IL 60601",
+          category: "distributor",
+          notes: "Logistics and distribution partner",
+          firmName: "Vertex Inc",
+        },
+      }
+
+      const vendorData = mockVendors[vendorId || "v1"] || mockVendors.v1
+      setFormData(vendorData)
+      setLoading(false)
+    }
+
+    loadVendorData()
+  }, [vendorId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -64,37 +121,44 @@ export default function AddVendorPage() {
       return
     }
 
-    setLoading(true)
+    setSubmitting(true)
 
     try {
-      // Simulate API call with delay
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Mock successful response
-      console.log("Vendor created:", {
+      console.log("Vendor updated:", {
         ...formData,
-        firmId,
-        id: `v${Math.random().toString(36).substr(2, 9)}`,
-        createdAt: new Date().toISOString(),
+        vendorId,
+        updatedAt: new Date().toISOString(),
       })
 
       setSuccess(true)
 
-      // Redirect after 1 second to show success message
       setTimeout(() => {
-        navigate(`/firm/${firmId}`)
+        navigate(`/vendors/${vendorId}`)
       }, 1000)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
-  if (!firmId || !activeFirm) {
+  if (!vendorId) {
     return (
       <div className="max-w-xl mx-auto px-4 py-6">
-        <p className="text-red-600">Invalid firm selected</p>
+        <p className="text-red-600">Invalid vendor selected</p>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Edit Vendor</h1>
+          <p className="text-muted-foreground">Loading vendor details...</p>
+        </div>
       </div>
     )
   }
@@ -102,9 +166,9 @@ export default function AddVendorPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Add Vendor</h1>
+        <h1 className="text-2xl font-semibold">Edit Vendor</h1>
         <p className="text-muted-foreground">
-          Adding vendor to <span className="font-medium">{activeFirm.name}</span>
+          Update information for <span className="font-medium">{formData.name}</span>
         </p>
       </div>
 
@@ -122,7 +186,7 @@ export default function AddVendorPage() {
 
             {success && (
               <div className="rounded-lg bg-green-100 p-4 text-green-800">
-                ✓ Vendor added successfully! Redirecting...
+                ✓ Vendor updated successfully! Redirecting...
               </div>
             )}
 
@@ -132,11 +196,11 @@ export default function AddVendorPage() {
               <Input
                 id="name"
                 name="name"
-                placeholder="e.g., Acme Supplies Inc."
+                placeholder="e.g., Acme Supplies"
                 value={formData.name}
                 onChange={handleChange}
                 required
-                disabled={loading || success}
+                disabled={submitting || success}
               />
             </div>
 
@@ -149,7 +213,7 @@ export default function AddVendorPage() {
                 placeholder="e.g., John Smith"
                 value={formData.contactPerson}
                 onChange={handleChange}
-                disabled={loading || success}
+                disabled={submitting || success}
               />
             </div>
 
@@ -164,7 +228,7 @@ export default function AddVendorPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                disabled={loading || success}
+                disabled={submitting || success}
               />
             </div>
 
@@ -178,7 +242,7 @@ export default function AddVendorPage() {
                 placeholder="+1 (555) 000-0000"
                 value={formData.phone}
                 onChange={handleChange}
-                disabled={loading || success}
+                disabled={submitting || success}
               />
             </div>
 
@@ -188,10 +252,10 @@ export default function AddVendorPage() {
               <Input
                 id="address"
                 name="address"
-                placeholder="123 Business Ave, City, State 12345"
+                placeholder="123 Business Ave, City, State"
                 value={formData.address}
                 onChange={handleChange}
-                disabled={loading || success}
+                disabled={submitting || success}
               />
             </div>
 
@@ -201,7 +265,7 @@ export default function AddVendorPage() {
               <Select 
                 value={formData.category} 
                 onValueChange={handleSelectChange} 
-                disabled={loading || success}
+                disabled={submitting || success}
               >
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select a category" />
@@ -217,17 +281,30 @@ export default function AddVendorPage() {
               </Select>
             </div>
 
+            {/* Firm Name (Read-only) */}
+            <div className="space-y-2">
+              <Label htmlFor="firmName">Firm Name</Label>
+              <Input
+                id="firmName"
+                type="text"
+                value={formData.firmName}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">This cannot be changed directly</p>
+            </div>
+
             {/* Notes */}
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
               <textarea
                 id="notes"
                 name="notes"
-                placeholder="Additional information about the vendor..."
+                placeholder="Additional information..."
                 value={formData.notes}
                 onChange={handleChange}
-                disabled={loading || success}
-                className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={submitting || success}
+                className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
@@ -235,16 +312,16 @@ export default function AddVendorPage() {
             <div className="flex gap-4 pt-4">
               <Button
                 type="submit"
-                disabled={loading || success}
+                disabled={submitting || success}
                 className="flex-1"
               >
-                {loading ? "Adding Vendor..." : success ? "✓ Vendor Added" : "Add Vendor"}
+                {submitting ? "Saving Changes..." : success ? "✓ Changes Saved" : "Save Changes"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(`/firm/${firmId}`)}
-                disabled={loading || success}
+                onClick={() => navigate(`/vendors/${vendorId}`)}
+                disabled={submitting || success}
                 className="flex-1"
               >
                 Cancel

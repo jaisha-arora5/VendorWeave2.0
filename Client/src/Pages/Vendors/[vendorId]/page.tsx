@@ -4,39 +4,186 @@ import { Button } from "../../../components/ui/button"
 import { Badge } from "../../../components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
 
+type Query = {
+  id: string
+  name: string
+  date: string
+  scoreImpact: number
+}
+
+type Vendor = {
+  id: string
+  name: string
+  firm: string
+  health: number
+  points: number
+  queries: Query[]
+}
+
 export default function VendorDetailsPage() {
   const { vendorId } = useParams()
   const navigate = useNavigate()
 
-  // Mock data - replace with API later
-  const vendor = {
-    id: vendorId,
-    name: "Vendor Alpha",
-    firm: "Alpha Corp",
-    health: 82,
-    points: 420,
+  // Mock vendor data - map each vendor ID to its data
+  const vendorDataMap: Record<string, Vendor> = {
+    v1: {
+      id: "v1",
+      name: "Vendor Alpha",
+      firm: "Alpha Corp",
+      health: 82,
+      points: 420,
+      queries: [
+        {
+          id: "q1",
+          name: "Q1 Performance Check",
+          date: "2024-12-20",
+          scoreImpact: +5,
+        },
+        {
+          id: "q2",
+          name: "Q2 Compliance Review",
+          date: "2024-12-15",
+          scoreImpact: -2,
+        },
+        {
+          id: "q3",
+          name: "Q3 Delivery Assessment",
+          date: "2024-12-10",
+          scoreImpact: +8,
+        },
+      ],
+    },
+    v2: {
+      id: "v2",
+      name: "Vendor Beta",
+      firm: "Nimbus Ltd",
+      health: 75,
+      points: 380,
+      queries: [
+        {
+          id: "q4",
+          name: "Q1 Service Review",
+          date: "2024-12-19",
+          scoreImpact: +3,
+        },
+        {
+          id: "q5",
+          name: "Q2 Reliability Check",
+          date: "2024-12-14",
+          scoreImpact: -1,
+        },
+        {
+          id: "q6",
+          name: "Q3 Support Quality",
+          date: "2024-12-09",
+          scoreImpact: +6,
+        },
+      ],
+    },
+    v3: {
+      id: "v3",
+      name: "Vendor Gamma",
+      firm: "Orion Group",
+      health: 88,
+      points: 450,
+      queries: [
+        {
+          id: "q7",
+          name: "Q1 Production Check",
+          date: "2024-12-21",
+          scoreImpact: +7,
+        },
+        {
+          id: "q8",
+          name: "Q2 Quality Audit",
+          date: "2024-12-16",
+          scoreImpact: +4,
+        },
+        {
+          id: "q9",
+          name: "Q3 Efficiency Review",
+          date: "2024-12-11",
+          scoreImpact: +9,
+        },
+      ],
+    },
+    v4: {
+      id: "v4",
+      name: "Vendor Delta",
+      firm: "Vertex Inc",
+      health: 68,
+      points: 320,
+      queries: [
+        {
+          id: "q10",
+          name: "Q1 Delivery Check",
+          date: "2024-12-18",
+          scoreImpact: +2,
+        },
+        {
+          id: "q11",
+          name: "Q2 Logistics Review",
+          date: "2024-12-13",
+          scoreImpact: -3,
+        },
+        {
+          id: "q12",
+          name: "Q3 Performance Check",
+          date: "2024-12-08",
+          scoreImpact: +1,
+        },
+      ],
+    },
   }
 
-  const queries = [
-    {
-      id: "q1",
-      name: "Q1 Performance Check",
-      date: "2024-12-20",
-      scoreImpact: +5,
-    },
-    {
-      id: "q2",
-      name: "Q2 Compliance Review",
-      date: "2024-12-15",
-      scoreImpact: -2,
-    },
-    {
-      id: "q3",
-      name: "Q3 Delivery Assessment",
-      date: "2024-12-10",
-      scoreImpact: +8,
-    },
-  ]
+  // Get vendor data based on vendorId, default to v1 if not found
+  const vendor = vendorDataMap[vendorId || "v1"] || vendorDataMap.v1
+  const queries = vendor.queries
+
+  // Validate vendor ID
+  if (!vendorId) {
+    return (
+      <div className="max-w-300 mx-auto px-4 py-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-600">❌ Error: No vendor selected</p>
+            <p className="text-sm text-red-500 mt-2">Please select a valid vendor from the list</p>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => navigate("/vendors")}
+            >
+              Back to Vendors List
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Check if vendor exists in our data
+  if (!vendorDataMap[vendorId]) {
+    return (
+      <div className="max-w-300 mx-auto px-4 py-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-600">❌ Error: Vendor not found</p>
+            <p className="text-sm text-red-500 mt-2">The vendor ID "{vendorId}" does not exist in the system</p>
+            <p className="text-sm text-red-500">Valid vendors: v1, v2, v3, v4</p>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => navigate("/vendors")}
+            >
+              Back to Vendors List
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-300 mx-auto px-4 py-6 space-y-6">
@@ -49,13 +196,25 @@ export default function VendorDetailsPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button size="sm" variant="outline">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate(`/vendors/${vendorId}/edit`)}
+            >
               Edit Vendor
             </Button>
-            <Button size="sm" variant="outline">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate(`/vendors/${vendorId}/add-query`)}
+            >
               Add Query
             </Button>
-            <Button size="sm" variant="outline">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate(`/vendors/${vendorId}/import-csv`)}
+            >
               Import CSV
             </Button>
           </div>
@@ -130,7 +289,7 @@ export default function VendorDetailsPage() {
             <CardContent>
               <div className="space-y-4">
                 {queries.length > 0 ? (
-                  queries.map((query) => (
+                  queries.map((query: Query) => (
                     <div
                       key={query.id}
                       className="flex items-center justify-between rounded-lg border p-4"

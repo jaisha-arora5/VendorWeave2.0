@@ -5,10 +5,10 @@ import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
 
 const firms = [
-  { id: "1", name: "Alpha Corp", vendors: 24, health: 92 },
-  { id: "2", name: "Nimbus Ltd", vendors: 18, health: 88 },
-  { id: "3", name: "Orion Group", vendors: 31, health: 85 },
-  { id: "4", name: "Vertex Inc", vendors: 12, health: 81 },
+  { id: "f1", name: "Alpha Corp", vendors: 24, health: 92 },
+  { id: "f2", name: "Nimbus Ltd", vendors: 18, health: 88 },
+  { id: "f3", name: "Orion Group", vendors: 31, health: 85 },
+  { id: "f4", name: "Vertex Inc", vendors: 12, health: 81 },
 ]
 
 export default function Firms() {
